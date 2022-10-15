@@ -1,12 +1,16 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 
 app.use(express.json());
+app.use(cors());
 
 var users = [];
 
 app.get("/", (req, res) => {
-  res.send("hello");
+  res.send({
+    translation: "orchuulga",
+  });
 });
 
 app.get("/greet/:name", (req, res) => {

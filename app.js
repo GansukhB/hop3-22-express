@@ -32,7 +32,7 @@ app.put("/user", (req, res) => {
     }
   }
   console.log(users);
-  res.send("user not found");
+  res.send("user updated");
 });
 
 app.listen(3000, () => {

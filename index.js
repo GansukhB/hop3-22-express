@@ -33,6 +33,26 @@ app.post("/users", async (req, res) => {
   });
 });
 
+app.put("/users", async (req, res) => {
+  const { username, email, password, id } = req.body;
+  const user = await User.findOne({ _id: id }).exec();
+  let message;
+  if (!user) {
+    message = "User not found";
+  } else {
+    user.username = username;
+    user.password = password;
+    user.save();
+    //user.delete()
+    message = "Updated user info";
+  }
+
+  res.send({
+    message,
+  });
+});
+//app.delete('/users', );
+
 app.listen(3000, () => {
   console.log("web server is running on port 3000");
 });

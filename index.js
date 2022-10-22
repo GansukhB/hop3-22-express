@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 const User = require("./models/Users");
+const Post = require("./models/Post");
 
 app.use(express.json());
 
@@ -19,6 +20,24 @@ app.get("/", async (req, res) => {
   res.send({
     data: users,
   });
+});
+app.post("/posts", async (req, res) => {
+  const { title, body, coverImage, userId } = req.body;
+  try {
+    const post = await Post.create({
+      title,
+      body,
+      coverImage,
+      author: userId,
+    });
+    res.send({
+      message: "Post added",
+    });
+  } catch (e) {
+    res.send({
+      error: e,
+    });
+  }
 });
 
 app.post("/users", async (req, res) => {

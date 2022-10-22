@@ -21,8 +21,17 @@ app.get("/", async (req, res) => {
     data: users,
   });
 });
+
+app.get("/posts", async (req, res) => {
+  const posts = await Post.find().populate("author");
+  res.send({
+    data: posts,
+  });
+});
+
 app.post("/posts", async (req, res) => {
   const { title, body, coverImage, userId } = req.body;
+  //if(title == ""){ res.send('title boglonuu')}
   try {
     const post = await Post.create({
       title,

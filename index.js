@@ -3,8 +3,10 @@ const mongoose = require("mongoose");
 const app = express();
 const User = require("./models/Users");
 const Post = require("./models/Post");
+const cors = require("cors");
 
 app.use(express.json());
+app.use(cors());
 
 const MONGODB_URL = "mongodb://localhost:27017/express_db";
 
@@ -26,6 +28,13 @@ app.get("/posts", async (req, res) => {
   const posts = await Post.find().populate("author");
   res.send({
     data: posts,
+  });
+});
+app.get("/posts/:postId", async (req, res) => {
+  const postId = req.params.postId;
+  const post = await Post.findById(postId).populate("author");
+  res.send({
+    data: post,
   });
 });
 
@@ -81,6 +90,6 @@ app.put("/users", async (req, res) => {
 });
 //app.delete('/users', );
 
-app.listen(3000, () => {
+app.listen(3001, () => {
   console.log("web server is running on port 3000");
 });

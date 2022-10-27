@@ -35,7 +35,7 @@ app.put("/user", (req, res) => {
   res.send("user not found");
 });
 
-app.listen(3000, () => {
+app.listen(3001, () => {
   console.log("servers is running");
 });
 /**

@@ -4,13 +4,17 @@ const app = express();
 const User = require("./models/Users");
 const Post = require("./models/Post");
 const cors = require("cors");
+require("dotenv").config();
+console.log(process.env);
 
 app.use(express.json());
 app.use(cors());
 
-const MONGODB_URL = "mongodb://localhost:27017/express_db";
+const MONGODB_URL = process.env.MONGODB_URL;
 
-mongoose.connect(MONGODB_URL);
+mongoose.connect(MONGODB_URL, {
+  autoIndex: true,
+});
 const connection = mongoose.connection;
 
 connection.once("open", () => {
@@ -60,14 +64,18 @@ app.post("/posts", async (req, res) => {
 
 app.post("/users", async (req, res) => {
   const { username, email, password } = req.body;
-  const user = await User.create({
-    username: username,
-    email,
-    password,
-  });
-  res.send({
-    message: "User added",
-  });
+  try {
+    const user = await User.create({
+      username: username,
+      email,
+      password,
+    });
+    res.send({
+      message: "User added",
+    });
+  } catch (e) {
+    res.send(e);
+  }
 });
 
 app.put("/users", async (req, res) => {

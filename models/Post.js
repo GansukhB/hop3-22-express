@@ -3,8 +3,8 @@ const { model, Schema } = require("mongoose");
 const postSchema = new Schema({
   title: {
     type: String,
-    maxLen: 255,
-    minLen: 5,
+    maxLenght: 255,
+    minLenght: 5,
     required: [true, "Заавал бөглөнө үү"],
   },
   body: {

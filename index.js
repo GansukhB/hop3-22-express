@@ -4,6 +4,8 @@ const app = express();
 const User = require("./models/Users");
 const Post = require("./models/Post");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+
 require("dotenv").config();
 console.log(process.env);
 
@@ -21,7 +23,29 @@ connection.once("open", () => {
   console.log("Successfully connected to MongoDB server");
 });
 
-app.get("/", async (req, res) => {
+const middleware = async (req, res, next) => {
+  const token = req.headers.authorization;
+  console.log(token);
+
+  jwt.verify(token, "secret", function (err, decoded) {
+    if (err) {
+      console.log(err);
+      res.send("Login invalid");
+      return;
+    }
+    console.log(decoded);
+    res.locals.userId = decoded.data._id;
+    next();
+  });
+  // yarn add jsonwebtoken
+  // if (!user) {
+  //   res.send("You should login");
+  // }
+  //console.log(req.body, req.query, "this is middleware");
+  // next();
+};
+
+app.get("/", middleware, async (req, res) => {
   const users = await User.find().lean(); // exec()
   res.send({
     data: users,
@@ -42,15 +66,16 @@ app.get("/posts/:postId", async (req, res) => {
   });
 });
 
-app.post("/posts", async (req, res) => {
+app.post("/posts", middleware, async (req, res) => {
   const { title, body, coverImage, userId } = req.body;
   //if(title == ""){ res.send('title boglonuu')}
+  console.log(res.locals.userId);
   try {
     const post = await Post.create({
       title,
       body,
       coverImage,
-      author: userId,
+      author: res.locals.userId,
     });
     res.send({
       message: "Post added",
@@ -62,7 +87,7 @@ app.post("/posts", async (req, res) => {
   }
 });
 
-app.post("/users", async (req, res) => {
+app.post("/users", middleware, async (req, res) => {
   const { username, email, password } = req.body;
   try {
     const user = await User.create({
@@ -94,6 +119,31 @@ app.put("/users", async (req, res) => {
 
   res.send({
     message,
+  });
+});
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({
+    email: email,
+    password: password,
+  }).lean();
+  if (user) {
+    token = jwt.sign(
+      {
+        data: user,
+      },
+      "secret",
+      {
+        expiresIn: "1h",
+      }
+    );
+    res.send({
+      token: token,
+    });
+  }
+  res.send({
+    message: "Invalid credential",
   });
 });
 //app.delete('/users', );

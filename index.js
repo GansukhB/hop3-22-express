@@ -37,12 +37,6 @@ const middleware = async (req, res, next) => {
     res.locals.userId = decoded.data._id;
     next();
   });
-  // yarn add jsonwebtoken
-  // if (!user) {
-  //   res.send("You should login");
-  // }
-  //console.log(req.body, req.query, "this is middleware");
-  // next();
 };
 
 app.get("/", middleware, async (req, res) => {
@@ -53,9 +47,19 @@ app.get("/", middleware, async (req, res) => {
 });
 
 app.get("/posts", async (req, res) => {
-  const posts = await Post.find().populate("author");
+  const page = req.query.page || 1;
+  const perPage = req.query.per_page || 5;
+
+  const offset = (page - 1) * perPage;
+
+  const posts = await Post.find({})
+    .populate("author")
+    .limit(perPage)
+    .skip(offset);
   res.send({
     data: posts,
+    page,
+    perPage,
   });
 });
 app.get("/posts/:postId", async (req, res) => {
@@ -87,7 +91,7 @@ app.post("/posts", middleware, async (req, res) => {
   }
 });
 
-app.post("/users", middleware, async (req, res) => {
+app.post("/users", async (req, res) => {
   const { username, email, password } = req.body;
   try {
     const user = await User.create({

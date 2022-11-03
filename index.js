@@ -5,12 +5,15 @@ const User = require("./models/Users");
 const Post = require("./models/Post");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const middleware = require("./middlewares/authorization");
+const postRouter = require("./routes/postRouter");
 
 require("dotenv").config();
 console.log(process.env);
 
 app.use(express.json());
 app.use(cors());
+app.use(postRouter);
 
 const MONGODB_URL = process.env.MONGODB_URL;
 
@@ -23,72 +26,11 @@ connection.once("open", () => {
   console.log("Successfully connected to MongoDB server");
 });
 
-const middleware = async (req, res, next) => {
-  const token = req.headers.authorization;
-  console.log(token);
-
-  jwt.verify(token, "secret", function (err, decoded) {
-    if (err) {
-      console.log(err);
-      res.send("Login invalid");
-      return;
-    }
-    console.log(decoded);
-    res.locals.userId = decoded.data._id;
-    next();
-  });
-};
-
 app.get("/", middleware, async (req, res) => {
   const users = await User.find().lean(); // exec()
   res.send({
     data: users,
   });
-});
-
-app.get("/posts", async (req, res) => {
-  const page = req.query.page || 1;
-  const perPage = req.query.per_page || 5;
-
-  const offset = (page - 1) * perPage;
-
-  const posts = await Post.find({})
-    .populate("author")
-    .limit(perPage)
-    .skip(offset);
-  res.send({
-    data: posts,
-    page,
-    perPage,
-  });
-});
-app.get("/posts/:postId", async (req, res) => {
-  const postId = req.params.postId;
-  const post = await Post.findById(postId).populate("author");
-  res.send({
-    data: post,
-  });
-});
-
-app.post("/posts", middleware, async (req, res) => {
-  const { title, body, coverImage, userId } = req.body;
-  //if(title == ""){ res.send('title boglonuu')}
-  console.log(res.locals.userId);
-  try {
-    const post = await Post.create({
-      title,
-      body,
-      coverImage,
-      author: res.locals.userId,
-    });
-    res.send({
-      message: "Post added",
-    });
-  } catch (e) {
-    res.send({
-      error: e,
-    });
-  }
 });
 
 app.post("/users", async (req, res) => {

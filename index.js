@@ -35,11 +35,44 @@ app.get("/", middleware, async (req, res) => {
   });
 });
 
-app.app;
+app.get("/posts", async (req, res) => {
+  console.log(req.body, req.query)
+  const posts = await Post.find().populate("author");
+  res.send({
+    data: posts,
+  });
+});
+app.get("/posts/:postId", async (req, res) => {
+  const postId = req.params.postId;
+  const post = await Post.findById(postId).populate("author");
+  res.send({
+    data: post,
+  });
+});
 
-app;
+app.post("/posts", middleware, async (req, res) => {
+  const { title, body, coverImage, userId } = req.body;
+  console.log(req.body);
+  try {
+    const post = await Post.create({
+      title,
+      body,
+      coverImage,
+      author: res.locals.userId,
+    });
+    res.send({
+      message: "Post added",
+    });
+  } catch (e) {
+    res.send({
+      error: e,
+    });
+  }
+});
+
+// app;
 //app.delete('/users', );
 
 app.listen(3001, () => {
-  console.log("web server is running on port 3000");
+  console.log("web server is running on port 3001");
 });

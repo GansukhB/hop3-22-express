@@ -44,7 +44,7 @@ postRouter.post("/posts", middleware, async (req, res) => {
       message: "Post added",
     });
   } catch (e) {
-    res.send({
+    res.status(400).send({
       error: e,
     });
   }

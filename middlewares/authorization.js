@@ -7,7 +7,7 @@ const middleware = async (req, res, next) => {
   jwt.verify(token, "secret", function (err, decoded) {
     if (err) {
       console.log(err);
-      res.send("Login invalid");
+      res.status(401).send({ message: "Login invalid" });
       return;
     }
     console.log(decoded);

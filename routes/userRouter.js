@@ -2,6 +2,7 @@ const express = require("express");
 const User = require("../models/Users");
 const middleware = require("../middlewares/authorization");
 const userRouter = express.Router();
+const jwt = require("jsonwebtoken");
 
 userRouter.post("/users", async (req, res) => {
   const { username, email, password } = req.body;

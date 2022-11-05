@@ -1,6 +1,5 @@
 const express = require("express");
 const User = require("../models/Users");
-const middleware = require("../middlewares/authorization");
 const userRouter = express.Router();
 const jwt = require("jsonwebtoken");
 
@@ -58,6 +57,7 @@ userRouter.post("/login", async (req, res) => {
     res.send({
       token: token,
     });
+    return;
   }
   res.send({
     message: "Invalid credential",

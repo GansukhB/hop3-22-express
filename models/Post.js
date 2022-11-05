@@ -4,8 +4,8 @@ const postSchema = new Schema(
   {
     title: {
       type: String,
-      maxLenght: 255,
-      minLenght: 5,
+      maxLength: 255,
+      minLength: 5,
       required: [true, "Заавал бөглөнө үү"],
     },
     body: {

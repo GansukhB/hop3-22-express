@@ -1,9 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const fileUpload = require("express-fileupload");
 const app = express();
 const User = require("./models/Users");
 const Post = require("./models/Post");
 const cors = require("cors");
+const path = require("path");
 const jwt = require("jsonwebtoken");
 const middleware = require("./middlewares/authorization");
 const postRouter = require("./routes/postRouter");
@@ -11,8 +13,10 @@ const userRouter = require("./routes/userRouter");
 
 require("dotenv").config();
 console.log(process.env);
+app.use("/uploads/", express.static(path.join(__dirname, "uploads")));
 
 app.use(express.json());
+app.use(fileUpload());
 app.use(cors());
 app.use(postRouter);
 app.use(userRouter);
@@ -35,43 +39,25 @@ app.get("/", middleware, async (req, res) => {
   });
 });
 
-app.get("/posts", async (req, res) => {
-  console.log(req.body, req.query)
-  const posts = await Post.find().populate("author");
-  res.send({
-    data: posts,
-  });
-});
-app.get("/posts/:postId", async (req, res) => {
-  const postId = req.params.postId;
-  const post = await Post.findById(postId).populate("author");
-  res.send({
-    data: post,
-  });
-});
-
-app.post("/posts", middleware, async (req, res) => {
-  const { title, body, coverImage, userId } = req.body;
-  console.log(req.body);
-  try {
-    const post = await Post.create({
-      title,
-      body,
-      coverImage,
-      author: res.locals.userId,
-    });
-    res.send({
-      message: "Post added",
-    });
-  } catch (e) {
-    res.send({
-      error: e,
-    });
+app.post("/upload", async (req, res) => {
+  if (!req.files) {
+    res.send("No file");
   }
-});
+  const file = req.files.file;
+  const uploadDir = __dirname + "/uploads/" + file.name;
 
-// app;
-//app.delete('/users', );
+  console.log(uploadDir);
+
+  file.mv(uploadDir, function (err) {
+    console.log(err);
+    if (err) res.status(400).send("Error");
+
+    res.send({
+      message: "Uploaded",
+      fileUrl: "http://localhost:3001/uploads/" + file.name,
+    });
+  });
+});
 
 app.listen(3001, () => {
   console.log("web server is running on port 3001");
